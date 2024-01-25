@@ -6,11 +6,14 @@ use App\Models\Trip;
 use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PresenceChannel;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
-class TripAccepted implements ShouldBroadcast
+class TripCreated implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -33,8 +36,9 @@ class TripAccepted implements ShouldBroadcast
      */
     public function broadcastOn(): array
     {
+        Log::info("broadcastOn: driver");
         return [
-            new Channel('passenger_' . $this->user->id),
+            new Channel('drivers'),
         ];
     }
 }

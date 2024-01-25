@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Events\TripAccepted;
 use App\Events\TripCompleted;
+use App\Events\TripCreated;
 use App\Events\TripStarted;
 use App\Events\TripLocationUpdated;
 use App\Models\Trip;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class TripController extends Controller
 {
@@ -19,11 +21,16 @@ class TripController extends Controller
             'destination_name' => 'required',
         ]);
 
-        return $request->user()->trips()->create($request->only([
+        $trip = $request->user()->trips()->create($request->only([
             'origin',
             'destination',
             'destination_name',
         ]));
+
+        TripCreated::dispatch($trip, $request->user());
+
+        return $trip;
+
     }
 
     public function show(Request $request, Trip $trip)
@@ -45,7 +52,7 @@ class TripController extends Controller
     public function accept(Request $request, Trip $trip)
     {
         $request->validate([
-                'driver-location' => 'required'
+                'driver_location' => 'required'
             ]
         );
 
@@ -54,9 +61,9 @@ class TripController extends Controller
             'driver_location' => $request->driver_location
         ]);
 
-        $trip->load('driver.user');
+        $trip->load('user.driver');
 
-        TripAccepted::dispatch($trip, $request -> user());
+        TripAccepted::dispatch($trip, $trip->user);
 
         return $trip;
     }
@@ -69,7 +76,7 @@ class TripController extends Controller
 
         $trip->load('driver.user');
 
-        TripStarted::dispatch($trip, $request -> user());
+        TripStarted::dispatch($trip, $request->user());
 
         return $trip;
     }
@@ -82,7 +89,7 @@ class TripController extends Controller
 
         $trip->load('driver.user');
 
-        TripCompleted::dispatch($trip, $request -> user());
+        TripCompleted::dispatch($trip, $request->user());
 
         return $trip;
     }
@@ -100,7 +107,7 @@ class TripController extends Controller
 
         $trip->load('driver.user');
 
-        TripLocationUpdated::dispatch($trip, $request -> user());
+        TripLocationUpdated::dispatch($trip, $request->user());
 
 
         return $trip;

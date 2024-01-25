@@ -26,7 +26,7 @@
         </div>
         <div class="bg-gray-50 px-4 py-3 text-right sm:px-6">
           <button
-              @click="confirmTrip"
+              @click="handleConfirmTrip"
               type="button"
               class="inline-flex justify-center rounded-md border border-transparent bg-black py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-gray-600">
             Let's Go!
@@ -44,8 +44,10 @@ import {useRouter} from "vue-router";
 import {onMounted, ref} from "vue";
 import axios from "axios";
 import http from "@/helpers/http.js";
+import {useTripStore} from "@/stores/trip.js";
 
 const location = useLocationStore()
+const trip = useTripStore()
 const router = useRouter()
 const gMap = ref(null)
 
@@ -81,13 +83,14 @@ onMounted(async () => {
     })
   })
 })
-const confirmTrip = () => {
+const handleConfirmTrip = () => {
   http().post('/api/trip', {
     origin: location.current.geometry,
     destination: location.destination.geometry,
     destination_name: location.destination.name
   })
       .then((response) => {
+        trip.$patch(response.data)
         router.push({
           name: 'trip'
         })
